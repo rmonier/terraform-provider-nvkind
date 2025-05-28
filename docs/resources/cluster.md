@@ -1,12 +1,12 @@
 # kind_cluster
 
-Provides a Kind cluster resource. This can be used to create and delete Kind
-clusters. It does NOT support modification to an existing kind cluster.
+Provides a NVKind cluster resource. This can be used to create and delete NVKind
+clusters. It does NOT support modification to an existing nvkind cluster.
 
 ## Example Usage
 
 ```hcl
-# Create a kind cluster of the name "test-cluster" with default kubernetes
+# Create a nvkind cluster of the name "test-cluster" with default kubernetes
 # version specified in kind
 # ref: https://github.com/kubernetes-sigs/kind/blob/master/pkg/apis/config/defaults/image.go#L21
 resource "kind_cluster" "default" {
@@ -17,9 +17,9 @@ resource "kind_cluster" "default" {
 To override the node image used:
 
 ```hcl
-provider "kind" {}
+provider "nvkind" {}
 
-# Create a cluster with kind of the name "test-cluster" with kubernetes version v1.27.1
+# Create a cluster with nvkind of the name "test-cluster" with kubernetes version v1.27.1
 resource "kind_cluster" "default" {
     name = "test-cluster"
     node_image = "kindest/node:v1.27.1"
@@ -29,7 +29,7 @@ resource "kind_cluster" "default" {
 To configure the cluster for nginx's ingress controller based on [kind's docs](https://kind.sigs.k8s.io/docs/user/ingress/):
 
 ```hcl
-provider "kind" {}
+provider "nvkind" {}
 
 resource "kind_cluster" "default" {
     name           = "test-cluster"
@@ -63,12 +63,12 @@ resource "kind_cluster" "default" {
 }
 ```
 
-To override the default kind config:
+To override the default nvkind config:
 
 ```hcl
-provider "kind" {}
+provider "nvkind" {}
 
-# creating a cluster with kind of the name "test-cluster" with kubernetes version v1.27.1 and two nodes
+# creating a cluster with nvkind of the name "test-cluster" with kubernetes version v1.27.1 and two nodes
 resource "kind_cluster" "default" {
     name = "test-cluster"
     node_image = "kindest/node:v1.27.1"
@@ -87,7 +87,7 @@ resource "kind_cluster" "default" {
 
 
 ```hcl
-provider "kind" {}
+provider "nvkind" {}
 
 # Create a cluster with patches applied to the containerd config
 resource "kind_cluster" "default" {
@@ -120,8 +120,8 @@ resource "kind_cluster" "default" {
 
 ## Argument Reference
 
-* `name` - (Required) The kind name that is given to the created cluster.
-* `node_image` - (Optional) The node_image that kind will use (ex: kindest/node:v1.27.1).
+* `name` - (Required) The nvkind name that is given to the created cluster.
+* `node_image` - (Optional) The node_image that nvkind will use (ex: kindest/node:v1.27.1).
 * `wait_for_ready` - (Optional) Defines wether or not the provider will wait for the control plane to be ready. Defaults to false.
 * `kind_config` - (Optional) The kind_config that kind will use.
 * `kubeconfig_path` - kubeconfig path set after the the cluster is created or by the user to override defaults.

@@ -1,13 +1,13 @@
 terraform {
   required_providers {
-    kind = {
-      source  = "tehcyx/kind"
+    nvkind = {
+      source  = "rmonier/nvkind"
       version = "~> 0.0.19"
     }
   }
 }
 
-provider "kind" {
+provider "nvkind" {
 }
 
 resource "kind_cluster" "default" {

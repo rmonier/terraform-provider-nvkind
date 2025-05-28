@@ -1,4 +1,4 @@
-package kind
+package nvkind
 
 import (
 	"context"
@@ -17,7 +17,7 @@ var testAccProviderFunc func() *schema.Provider
 func init() {
 	testAccProvider = Provider()
 	testAccProviders = map[string]*schema.Provider{
-		"kind": testAccProvider,
+		"nvkind": testAccProvider,
 	}
 	testAccProviderFunc = func() *schema.Provider { return testAccProvider }
 }
@@ -49,6 +49,6 @@ func testAccCheckClusterName(resourceName, attributeName, clusterName string) re
 
 func testAccSimpleClusterProviderConfig() string {
 	return fmt.Sprintf(`
-	provider "kind" {}
+	provider "nvkind" {}
 `)
 }

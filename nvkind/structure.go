@@ -1,4 +1,4 @@
-package kind
+package nvkind
 
 import "github.com/pelletier/go-toml"
 

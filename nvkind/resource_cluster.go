@@ -1,9 +1,11 @@
-package kind
+package nvkind
 
 import (
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	clientcmd "k8s.io/client-go/tools/clientcmd"
@@ -44,6 +46,15 @@ func resourceCluster() *schema.Resource {
 				Default:     false,
 				ForceNew:    true, // TODO remove this once we have the update method defined.
 				Optional:    true,
+			},
+			"gpu_settings": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				ForceNew: true,
+				Elem: &schema.Resource{
+					Schema: gpuConfigFields(),
+				},
 			},
 			"kind_config": {
 				Type:        schema.TypeList,
@@ -201,5 +212,59 @@ func resourceKindClusterDelete(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 	d.SetId("")
+	return nil
+}
+
+func resourceNVKindClusterCreate(d *schema.ResourceData, meta interface{}) error {
+	log.Println("Creating local Kubernetes cluster with NVIDIA GPUs access...")
+	cfg := d.Get("gpu_settings").([]interface{})
+	name := d.Get("name").(string)
+	nodeImage := d.Get("node_image").(string)
+	if len(cfg) > 0 {
+		gs := cfg[0].(map[string]interface{})
+		if gs["distribute_evenly"].(bool) {
+			// Use equally-distributed template
+			numWorkers := gs["node_count"].(int)
+			gpusPer := gs["gpus_per_node"].(int)
+			values := fmt.Sprintf("numWorkers: %d\nnumGPUs: %d\n", numWorkers, numWorkers*gpusPer)
+			return runNvkindCreate(name, nodeImage, "equally-distributed-gpus.yaml", values)
+		} else if workers := gs["workers"].([]interface{}); len(workers) > 0 {
+			// Use explicit devices template
+			var values strings.Builder
+			values.WriteString("workers:\n")
+			for _, w := range workers {
+				m := w.(map[string]interface{})
+				devs := m["devices"].([]interface{})
+				values.WriteString(" - devices: [")
+				for i, d := range devs {
+					if i > 0 {
+						values.WriteString(",")
+					}
+					values.WriteString(fmt.Sprintf("%d", d.(int)))
+				}
+				values.WriteString("]\n")
+			}
+			return runNvkindCreate(name, nodeImage, "explicit-gpus-per-worker.yaml", values.String())
+		} else {
+			// Default: one worker with all GPUs
+			return runNvkindCreate(name, nodeImage, "", "") // nvkind default (one worker gets all GPUs)
+		}
+	}
+}
+
+func runNvkindCreate(name, image, templateFile, values string) error {
+	args := []string{"cluster", "create", "--name=" + name}
+	if image != "" {
+		args = append(args, "--image="+image)
+	}
+	// Use retain or wait flags as configured:
+	args = append(args, "--wait")
+	args = append(args, "--config-template="+templateFile, "--config-values=-")
+	cmd := exec.Command("nvkind", args...)
+	cmd.Stdin = strings.NewReader(values)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("nvkind create failed: %v: %s", err, output)
+	}
 	return nil
 }

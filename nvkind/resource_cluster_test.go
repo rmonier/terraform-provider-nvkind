@@ -1,4 +1,4 @@
-package kind
+package nvkind
 
 import (
 	"fmt"
@@ -24,7 +24,7 @@ func testSweepKindCluster(name string) error {
 	return nil
 }
 
-const nodeImage = "kindest/node:v1.29.7@sha256:f70ab5d833fca132a100c1f95490be25d76188b053f49a3c0047ff8812360baf"
+const nodeImage = "kindest/node:v1.33.0@sha256:91e9ed777db80279c22d1d1068c091b899b2078506e4a0f797fbf6e397c0b0b2"
 
 func TestAccCluster(t *testing.T) {
 	resourceName := "kind_cluster.test"

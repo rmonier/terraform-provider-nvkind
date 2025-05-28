@@ -2,10 +2,10 @@ package main
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
-	"github.com/tehcyx/terraform-provider-kind/kind"
+	"github.com/rmonier/terraform-provider-nvkind/nvkind"
 )
 
 func main() {
 	plugin.Serve(&plugin.ServeOpts{
-		ProviderFunc: kind.Provider})
+		ProviderFunc: nvkind.Provider})
 }

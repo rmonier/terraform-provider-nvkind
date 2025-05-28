@@ -31,7 +31,7 @@ fi
 ##
 if [ "$1" == "$CI_FLAG" ] || [ "$2" == "$CI_FLAG" ]; then
 	# build all binaries
-	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -o bin/terraform-provider-kind-windows-amd64
+	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -o bin/terraform-provider-nvkind-windows-amd64
 	goBuildResult=$?
 	if [ ${goBuildResult} != 0 ]; then
 		echo -e "${RED}✗ go build (windows)${NC}\n$goBuildResult${NC}"
@@ -39,7 +39,7 @@ if [ "$1" == "$CI_FLAG" ] || [ "$2" == "$CI_FLAG" ]; then
 	else echo -e "${GREEN}√ go build (windows)${NC}"
 	fi
 
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o bin/terraform-provider-kind-linux-amd64
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o bin/terraform-provider-nvkind-linux-amd64
 	goBuildResult=$?
 	if [ ${goBuildResult} != 0 ]; then
 		echo -e "${RED}✗ go build (linux)${NC}\n$goBuildResult${NC}"
@@ -47,7 +47,7 @@ if [ "$1" == "$CI_FLAG" ] || [ "$2" == "$CI_FLAG" ]; then
 	else echo -e "${GREEN}√ go build (linux)${NC}"
 	fi
 
-	CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o bin/terraform-provider-kind-darwin-amd64
+	CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o bin/terraform-provider-nvkind-darwin-amd64
 	goBuildResult=$?
 	if [ ${goBuildResult} != 0 ]; then
 		echo -e "${RED}✗ go build (mac)${NC}\n$goBuildResult${NC}"
@@ -56,7 +56,7 @@ if [ "$1" == "$CI_FLAG" ] || [ "$2" == "$CI_FLAG" ]; then
 	fi
 else
 	# build just current arch
-	CGO_ENABLED=0 go build -o bin/terraform-provider-kind
+	CGO_ENABLED=0 go build -o bin/terraform-provider-nvkind
 	goBuildResult=$?
 	if [ ${goBuildResult} != 0 ]; then
 		echo -e "${RED}✗ go build (dev)${NC}\n$goBuildResult${NC}"
@@ -97,9 +97,9 @@ goFilesToCheck=$(find . -type f -name "*.go" | egrep -v "\/vendor\/|_*/automock/
 if [ "$1" == "$TEST_ACC_FLAG" ] || [ "$2" == "$TEST_ACC_FLAG" ]; then
 	# run terraform acceptance tests
 	if [ "$1" == "$CI_FLAG" ] || [ "$2" == "$CI_FLAG" ]; then
-		TF_ACC=1 go test ./kind -v -count 1 -parallel 20 -timeout 120m
+		TF_ACC=1 go test ./nvkind -v -count 1 -parallel 20 -timeout 120m
 	else 
-		TF_ACC=1 go test ./kind -v -count 1 -parallel 1 -timeout 120m
+		TF_ACC=1 go test ./nvkind -v -count 1 -parallel 1 -timeout 120m
 	fi
 fi
 
@@ -117,7 +117,7 @@ fi
 ##
 # GO VET
 ##
-packagesToVet=("./kind/...")
+packagesToVet=("./nvkind/...")
 
 for vPackage in "${packagesToVet[@]}"; do
 	vetResult=$(go vet ${vPackage})
