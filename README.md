@@ -9,6 +9,10 @@ Based on the [Terraform Provider for kind](https://github.com/tehcyx/terraform-p
 
 > :warning: This provider does not allow the usage of the [sprig templated config](https://github.com/NVIDIA/nvkind?tab=readme-ov-file#describing-your-clusters) nor the `numGPUs` function, as we can rely on HCL scripts to create a dynamic configuration.
 
+## Prerequisites
+
+There are some [prerequisites](https://github.com/NVIDIA/nvkind/tree/b52126989300fb22e728f741943b1d43d5cf1e4f?tab=readme-ov-file#prerequisites) due to the nature of the nvkind features. Not all the tools necessary to run nvkind without Terraform are a prerequisite as we rely on the kind Go Package API instead of the binary. To make this provider work you need to have on your host [docker](https://docs.docker.com/get-docker/) and [kubectl](https://kubernetes.io/docs/tasks/tools/). You will also need to follow the [setup instructions](https://github.com/NVIDIA/nvkind/tree/b52126989300fb22e728f741943b1d43d5cf1e4f?tab=readme-ov-file#setup).
+
 ## Quick Starts
 - [Using the provider](./docs/USAGE.md)
 - [Provider development](./docs/DEVELOPMENT.md)

@@ -4,14 +4,16 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"reflect"
+	"unsafe"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	clientcmd "k8s.io/client-go/tools/clientcmd"
+	"k8s.io/client-go/util/homedir"
 	"sigs.k8s.io/kind/pkg/cluster"
 	"sigs.k8s.io/kind/pkg/cmd"
 
 	nvkind "github.com/NVIDIA/nvkind/pkg/nvkind"
-	"k8s.io/client-go/util/homedir"
 	"sigs.k8s.io/kind/pkg/apis/config/v1alpha4"
 )
 
@@ -114,9 +116,14 @@ func resourceKindClusterCreate(d *schema.ResourceData, meta interface{}) error {
 
 	if kubeconfigPath != nil {
 		kubeconfigPathStr = kubeconfigPath.(string)
-		if kubeconfigPathStr != "" {
-			copts = append(copts, cluster.CreateWithKubeconfigPath(kubeconfigPathStr))
+		if kubeconfigPathStr == "" {
+			// Let's add the nvkind default path
+			// see: https://github.com/NVIDIA/nvkind/blob/b52126989300fb22e728f741943b1d43d5cf1e4f/pkg/nvkind/cluster.go#L79-L83
+			if home := homedir.HomeDir(); home != "" {
+				kubeconfigPathStr = home + "/.kube/config"
+			}
 		}
+		copts = append(copts, cluster.CreateWithKubeconfigPath(kubeconfigPathStr))
 	}
 
 	if config != nil {
@@ -148,29 +155,81 @@ func resourceKindClusterCreate(d *schema.ResourceData, meta interface{}) error {
 
 	d.SetId(fmt.Sprintf("%s-%s", name, nodeImage))
 
+	// -----------------------------------------------------------------------
 	// --- Get the node names for nvkind setup and register Nvidia runtime ---
+	// -----------------------------------------------------------------------
+
+	// Get all the nodes and their container name
 	nodeList, err := provider.ListNodes(name)
 	if err != nil {
 		log.Printf("error listing nodes: %v", err)
 		return err
 	}
 
+	// Let's work on the nvkind main configuration
 	var configOptions []nvkind.ConfigOption
 	configOptions = append(configOptions, nvkind.WithDefaultName(name))
+	if nodeImage != "" {
+		configOptions = append(configOptions, nvkind.WithImage(nodeImage))
+	}
 	nvConfig, err := nvkind.NewConfig(configOptions...)
 	if err != nil {
 		log.Printf("new nvConfig: %w", err)
 		return err
 	}
 
+	// Dirty reflection ahead, but we don't want to use the default init
+	// as it uses the kind shell commands instead of the package API
+
+	nvConfigReflected := reflect.ValueOf(nvConfig).Elem()
+
+	// We get the automatically generated fileds from NewConfig
+	// as we want to let it handle these internals
+	// Also, we don't care about the Cluster field
+	// as we won't use the config after this fields init
+	nvmlReflected := nvConfigReflected.FieldByName("nvml")
+	stdoutReflected := nvConfigReflected.FieldByName("stdout")
+	stderrReflected := nvConfigReflected.FieldByName("stderr")
+
 	for i, node := range nodeList {
+		// Let's create the nvkind Node struct to apply the patches
 		nvNode := &nvkind.Node{
-			Name:   node.String(),
-			config: &clusterConfig.Nodes[i],
-			nvml:   nvConfig.nvml,
-			stdout: nvConfig.stdout,
-			stderr: nvConfig.stderr,
+			Name: node.String(),
 		}
+		nvNodeReflected := reflect.ValueOf(nvNode).Elem()
+
+		// We need to override the default placeholders and set or current instances
+		// because we can't use the classic Node initialization that uses the kind
+		// shell commands instead of the package API
+
+		nodeField := nvNodeReflected.FieldByName("config")
+		if nodeField.IsValid() && nodeField.CanAddr() {
+			ptr := unsafe.Pointer(nodeField.UnsafeAddr())
+			// The clusterConfig.Nodes[i] should work as the nodes are sorted in the same way as they
+			// are in the cluster YAML or HCL definition
+			reflect.NewAt(nodeField.Type(), ptr).Elem().Set(reflect.ValueOf(&clusterConfig.Nodes[i]))
+		}
+
+		nvmlField := nvNodeReflected.FieldByName("nvml")
+		if nvmlField.IsValid() && nvmlField.CanAddr() {
+			ptr := unsafe.Pointer(nvmlField.UnsafeAddr())
+			reflect.NewAt(nvmlField.Type(), ptr).Elem().Set(reflect.ValueOf(nvmlReflected))
+		}
+
+		stdoutField := nvNodeReflected.FieldByName("stdout")
+		if stdoutField.IsValid() && stdoutField.CanAddr() {
+			ptr := unsafe.Pointer(stdoutField.UnsafeAddr())
+			reflect.NewAt(stdoutField.Type(), ptr).Elem().Set(reflect.ValueOf(stdoutReflected))
+		}
+
+		stderrField := nvNodeReflected.FieldByName("stderr")
+		if stderrField.IsValid() && stderrField.CanAddr() {
+			ptr := unsafe.Pointer(stderrField.UnsafeAddr())
+			reflect.NewAt(stderrField.Type(), ptr).Elem().Set(reflect.ValueOf(stderrReflected))
+		}
+
+		// Let's patch the runtime nodes
+		// TODO: bypass the docker shell calls in runScript and use cluster.NewProvider instead
 
 		if !nvNode.HasGPUs() {
 			continue
@@ -189,34 +248,59 @@ func resourceKindClusterCreate(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
-	var clusterOptions []nvkind.ClusterOption
-	clusterOptions = append(clusterOptions, nvkind.WithConfig(nvConfig))
-
-	o := nvkind.ClusterOptions{}
-	for _, opt := range clusterOptions {
-		opt(&o)
-	}
-
-	if kubeconfigPathStr == "" {
-		if home := homedir.HomeDir(); home != "" {
-			kubeconfigPathStr = home + "/.kube/config"
-		}
-	}
+	// Let's create the nvkind Cluster struct to apply the patches
 
 	nvCluster := &nvkind.Cluster{
-		Name:       o.config.Name,
-		config:     clusterConfig,
-		kubeconfig: kubeconfigPathStr,
-		nvml:       o.config.nvml,
-		stdout:     o.config.stdout,
-		stderr:     o.config.stderr,
+		Name: name,
 	}
+
+	// Again, we need to override the default placeholders and set or current instances
+	// because the classic Cluster initialization with NewCluster uses the kind
+	// shell commands for the setConfig part instead of the package API
+
+	nvClusterReflected := reflect.ValueOf(nvCluster).Elem()
+
+	clusterField := nvClusterReflected.FieldByName("config")
+	if clusterField.IsValid() && clusterField.CanAddr() {
+		ptr := unsafe.Pointer(clusterField.UnsafeAddr())
+		reflect.NewAt(clusterField.Type(), ptr).Elem().Set(reflect.ValueOf(clusterConfig))
+	}
+
+	kubeconfigField := nvClusterReflected.FieldByName("kubeconfig")
+	if kubeconfigField.IsValid() && kubeconfigField.CanAddr() {
+		ptr := unsafe.Pointer(kubeconfigField.UnsafeAddr())
+		reflect.NewAt(kubeconfigField.Type(), ptr).Elem().Set(reflect.ValueOf(kubeconfigPathStr))
+	}
+
+	nvmlField := nvClusterReflected.FieldByName("nvml")
+	if nvmlField.IsValid() && nvmlField.CanAddr() {
+		ptr := unsafe.Pointer(nvmlField.UnsafeAddr())
+		reflect.NewAt(nvmlField.Type(), ptr).Elem().Set(reflect.ValueOf(nvmlReflected))
+	}
+
+	stdoutField := nvClusterReflected.FieldByName("stdout")
+	if stdoutField.IsValid() && stdoutField.CanAddr() {
+		ptr := unsafe.Pointer(stdoutField.UnsafeAddr())
+		reflect.NewAt(stdoutField.Type(), ptr).Elem().Set(reflect.ValueOf(stdoutReflected))
+	}
+
+	stderrField := nvClusterReflected.FieldByName("stderr")
+	if stderrField.IsValid() && stderrField.CanAddr() {
+		ptr := unsafe.Pointer(stderrField.UnsafeAddr())
+		reflect.NewAt(stderrField.Type(), ptr).Elem().Set(reflect.ValueOf(stderrReflected))
+	}
+
+	// Let's patch the runtime cluster with kubectl
+	// TODO: bypass the kubectl shell call and use clientcmd instead
 
 	if err := nvCluster.RegisterNvidiaRuntimeClass(); err != nil {
 		log.Printf("registering runtime class: %w", err)
 		return err
 	}
-	// --- ---
+
+	// -----------------------------------------------------------------------
+	// -----------------------------------------------------------------------
+	// -----------------------------------------------------------------------
 
 	return resourceKindClusterRead(d, meta)
 }
