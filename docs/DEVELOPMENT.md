@@ -18,6 +18,8 @@ Perform the following steps to build the providers:
 
     >**NOTE**: For details on Terraform plugins see [this](https://www.terraform.io/docs/plugins/basics.html#installing-plugins) document.
 
+You can also use `make build` to build it. You need to build it on a UNIX system as Windows miss some dependencies (dlfcn missing, unable to determine what C.RTLD_NODELETE and C.RTLD_NOLOAD refers to, etc).
+
 ## Testing
 
 In order to test the provider you can run `go test ./...` for the unit tests as well as `make testacc` for the Acceptance Tests. If you prefer to only run tests and skip linting and formatting when running Acceptance Tests start them by running `TF_ACC=1 go test ./nvkind -v -count 1 -parallel 20 -timeout 120m`.

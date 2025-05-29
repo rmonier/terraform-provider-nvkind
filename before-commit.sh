@@ -31,7 +31,7 @@ fi
 ##
 if [ "$1" == "$CI_FLAG" ] || [ "$2" == "$CI_FLAG" ]; then
 	# build all binaries
-	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -o bin/terraform-provider-nvkind-windows-amd64
+	CGO_ENABLED=1 GOOS=windows GOARCH=amd64 go build -o bin/terraform-provider-nvkind-windows-amd64
 	goBuildResult=$?
 	if [ ${goBuildResult} != 0 ]; then
 		echo -e "${RED}✗ go build (windows)${NC}\n$goBuildResult${NC}"
@@ -39,7 +39,7 @@ if [ "$1" == "$CI_FLAG" ] || [ "$2" == "$CI_FLAG" ]; then
 	else echo -e "${GREEN}√ go build (windows)${NC}"
 	fi
 
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o bin/terraform-provider-nvkind-linux-amd64
+	CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -o bin/terraform-provider-nvkind-linux-amd64
 	goBuildResult=$?
 	if [ ${goBuildResult} != 0 ]; then
 		echo -e "${RED}✗ go build (linux)${NC}\n$goBuildResult${NC}"
@@ -47,7 +47,7 @@ if [ "$1" == "$CI_FLAG" ] || [ "$2" == "$CI_FLAG" ]; then
 	else echo -e "${GREEN}√ go build (linux)${NC}"
 	fi
 
-	CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o bin/terraform-provider-nvkind-darwin-amd64
+	CGO_ENABLED=1 GOOS=darwin GOARCH=amd64 go build -o bin/terraform-provider-nvkind-darwin-amd64
 	goBuildResult=$?
 	if [ ${goBuildResult} != 0 ]; then
 		echo -e "${RED}✗ go build (mac)${NC}\n$goBuildResult${NC}"
@@ -56,7 +56,7 @@ if [ "$1" == "$CI_FLAG" ] || [ "$2" == "$CI_FLAG" ]; then
 	fi
 else
 	# build just current arch
-	CGO_ENABLED=0 go build -o bin/terraform-provider-nvkind
+	CGO_ENABLED=1 go build -o bin/terraform-provider-nvkind
 	goBuildResult=$?
 	if [ ${goBuildResult} != 0 ]; then
 		echo -e "${RED}✗ go build (dev)${NC}\n$goBuildResult${NC}"

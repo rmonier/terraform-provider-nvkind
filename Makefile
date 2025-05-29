@@ -35,4 +35,4 @@ endif
 install: build
 	@echo "==> Installing plugin to $(DESTINATION)"
 	@mkdir -p $(DESTINATION)
-	@cp ./bin/terraform-provider-kind $(DESTINATION)
+	@cp ./bin/terraform-provider-nvkind $(DESTINATION)
