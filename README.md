@@ -7,6 +7,8 @@ The Terraform Provider for nvkind enables [Terraform](https://www.terraform.io) 
 
 Based on the [Terraform Provider for kind](https://github.com/tehcyx/terraform-provider-kind) by [Daniel Roth](https://github.com/tehcyx), licensed under Apache 2.0 — see LICENSE and NOTICE.md for details.
 
+> :warning: This provider does not allow the usage of the [sprig templated config](https://github.com/NVIDIA/nvkind?tab=readme-ov-file#describing-your-clusters) nor the `numGPUs` function, as we can rely on HCL scripts to create a dynamic configuration.
+
 ## Quick Starts
 - [Using the provider](./docs/USAGE.md)
 - [Provider development](./docs/DEVELOPMENT.md)

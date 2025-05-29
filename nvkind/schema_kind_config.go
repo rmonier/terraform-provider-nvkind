@@ -211,28 +211,3 @@ func kindConfigNodeExtraPortMappingsFields() map[string]*schema.Schema {
 	}
 	return s
 }
-
-func gpuConfigFields() map[string]*schema.Schema {
-	s := map[string]*schema.Schema{
-		"distribute_evenly": {Type: schema.TypeBool, Optional: true, Default: false},
-		"node_count":        {Type: schema.TypeInt, Optional: true},
-		"gpus_per_node":     {Type: schema.TypeInt, Optional: true},
-		"workers": {
-			Type:     schema.TypeList,
-			Optional: true,
-			Elem: &schema.Resource{
-				Schema: map[string]*schema.Schema{
-					"devices": {
-						Type:     schema.TypeList,
-						Elem:     &schema.Schema{Type: schema.TypeInt},
-						Optional: true,
-					},
-				},
-			},
-		},
-		"container_runtime": {Type: schema.TypeString, Optional: true, Default: "nvidia-container-runtime"},
-		"mig_enabled":       {Type: schema.TypeBool, Optional: true, Default: false},
-		"accept_visible":    {Type: schema.TypeBool, Optional: true, Default: false},
-	}
-	return s
-}

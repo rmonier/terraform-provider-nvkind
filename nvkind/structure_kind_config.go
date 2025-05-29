@@ -3,14 +3,13 @@ package nvkind
 import (
 	"strings"
 
-	"github.com/NVIDIA/nvkind/pkg/nvkind"
 	"sigs.k8s.io/kind/pkg/apis/config/v1alpha4"
 )
 
 // Flatteners
 
 func flattenKindConfig(d map[string]interface{}) *v1alpha4.Cluster {
-	obj := &nvkind.Cluster{}
+	obj := &v1alpha4.Cluster{}
 
 	obj.Kind = mapKeyIfExists(d, "kind").(string)
 	obj.APIVersion = mapKeyIfExists(d, "api_version").(string)
