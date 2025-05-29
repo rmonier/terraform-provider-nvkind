@@ -174,7 +174,7 @@ func resourceKindClusterCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 	nvConfig, err := nvkind.NewConfig(configOptions...)
 	if err != nil {
-		log.Printf("new nvConfig: %w", err)
+		log.Printf("new nvConfig: %v", err)
 		return err
 	}
 
@@ -235,15 +235,15 @@ func resourceKindClusterCreate(d *schema.ResourceData, meta interface{}) error {
 			continue
 		}
 		if err := nvNode.InstallContainerToolkit(); err != nil {
-			log.Printf("installing container toolkit on node '%v': %w", nvNode.Name, err)
+			log.Printf("installing container toolkit on node '%v': %v", nvNode.Name, err)
 			return err
 		}
 		if err := nvNode.ConfigureContainerRuntime(); err != nil {
-			log.Printf("configuring container runtime on node '%v': %w", nvNode.Name, err)
+			log.Printf("configuring container runtime on node '%v': %v", nvNode.Name, err)
 			return err
 		}
 		if err := nvNode.PatchProcDriverNvidia(); err != nil {
-			log.Printf("patching /proc/driver/nvidia on node '%v': %w", nvNode.Name, err)
+			log.Printf("patching /proc/driver/nvidia on node '%v': %v", nvNode.Name, err)
 			return err
 		}
 	}
@@ -294,7 +294,7 @@ func resourceKindClusterCreate(d *schema.ResourceData, meta interface{}) error {
 	// TODO: bypass the kubectl shell call and use clientcmd instead
 
 	if err := nvCluster.RegisterNvidiaRuntimeClass(); err != nil {
-		log.Printf("registering runtime class: %w", err)
+		log.Printf("registering runtime class: %v", err)
 		return err
 	}
 
