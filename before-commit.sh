@@ -28,31 +28,32 @@ fi
 
 ##
 # GO BUILD
+# FIXME: Only linux and macos work, we lack RTLD_NODELETE and RTLD_NOLOAD in windows (we do noop to bypass the error but we still have an issue)
 ##
 if [ "$1" == "$CI_FLAG" ] || [ "$2" == "$CI_FLAG" ]; then
 	# build all binaries
-	CGO_ENABLED=1 GOOS=windows GOARCH=amd64 go build -o bin/terraform-provider-nvkind-windows-amd64
-	goBuildResult=$?
-	if [ ${goBuildResult} != 0 ]; then
-		echo -e "${RED}✗ go build (windows)${NC}\n$goBuildResult${NC}"
-		exit 1
-	else echo -e "${GREEN}√ go build (windows)${NC}"
-	fi
-
-	CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -o bin/terraform-provider-nvkind-linux-amd64
+	# We can't use Zig to compile for linux due to https://github.com/ziglang/zig/issues/21007
+	CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -x -o bin/terraform-provider-nvkind-linux-amd64
 	goBuildResult=$?
 	if [ ${goBuildResult} != 0 ]; then
 		echo -e "${RED}✗ go build (linux)${NC}\n$goBuildResult${NC}"
 		exit 1
 	else echo -e "${GREEN}√ go build (linux)${NC}"
 	fi
-
-	CGO_ENABLED=1 GOOS=darwin GOARCH=amd64 go build -o bin/terraform-provider-nvkind-darwin-amd64
+	# We need macos SDK
+	CGO_ENABLED=1 GOOS=darwin GOARCH=amd64 CC="zig cc -target x86_64-macos" CXX="zig c++ -target x86_64-macos" go build -x -o bin/terraform-provider-nvkind-darwin-amd64
 	goBuildResult=$?
 	if [ ${goBuildResult} != 0 ]; then
 		echo -e "${RED}✗ go build (mac)${NC}\n$goBuildResult${NC}"
 		exit 1
 	else echo -e "${GREEN}√ go build (mac)${NC}"
+	fi
+	CGO_ENABLED=1 GOOS=windows GOARCH=amd64 CC="zig cc -target x86_64-windows-gnu" CXX="zig c++ -target x86_64-windows-gnu" CGO_CFLAGS="-DRTLD_NODELETE=0 -DRTLD_NOLOAD=0" go build -x -o bin/terraform-provider-nvkind-windows-amd64
+	goBuildResult=$?
+	if [ ${goBuildResult} != 0 ]; then
+		echo -e "${RED}✗ go build (windows)${NC}\n$goBuildResult${NC}"
+		exit 1
+	else echo -e "${GREEN}√ go build (windows)${NC}"
 	fi
 else
 	# build just current arch

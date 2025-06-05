@@ -68,3 +68,4 @@ terraform.rc
 
 # Build artifacts
 bin/
+dist/
