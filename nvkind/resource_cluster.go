@@ -203,35 +203,35 @@ func resourceKindClusterCreate(d *schema.ResourceData, meta interface{}) error {
 		// shell commands instead of the package API
 
 		nodeField := nvNodeReflected.FieldByName("config")
-		if nodeField.IsValid() && nodeField.CanAddr() {
+		if clusterConfig != nil && clusterConfig.Nodes != nil && nodeField.IsValid() && nodeField.CanAddr() {
 			ptr := unsafe.Pointer(nodeField.UnsafeAddr())
 			// The clusterConfig.Nodes[i] should work as the nodes are sorted in the same way as they
 			// are in the cluster YAML or HCL definition
-			reflect.NewAt(nodeField.Type(), ptr).Elem().Set(reflect.ValueOf(&clusterConfig.Nodes[i]))
+			*(**v1alpha4.Node)(ptr) = &clusterConfig.Nodes[i]
 		}
 
 		nvmlField := nvNodeReflected.FieldByName("nvml")
 		if nvmlField.IsValid() && nvmlField.CanAddr() {
 			ptr := unsafe.Pointer(nvmlField.UnsafeAddr())
-			reflect.NewAt(nvmlField.Type(), ptr).Elem().Set(reflect.ValueOf(nvmlReflected))
+			*(**any)(ptr) = (*any)(unsafe.Pointer(&nvmlReflected))
 		}
 
 		stdoutField := nvNodeReflected.FieldByName("stdout")
 		if stdoutField.IsValid() && stdoutField.CanAddr() {
 			ptr := unsafe.Pointer(stdoutField.UnsafeAddr())
-			reflect.NewAt(stdoutField.Type(), ptr).Elem().Set(reflect.ValueOf(stdoutReflected))
+			*(**os.File)(ptr) = (*os.File)(unsafe.Pointer(&stdoutReflected))
 		}
 
 		stderrField := nvNodeReflected.FieldByName("stderr")
 		if stderrField.IsValid() && stderrField.CanAddr() {
 			ptr := unsafe.Pointer(stderrField.UnsafeAddr())
-			reflect.NewAt(stderrField.Type(), ptr).Elem().Set(reflect.ValueOf(stderrReflected))
+			*(**os.File)(ptr) = (*os.File)(unsafe.Pointer(&stderrReflected))
 		}
 
 		// Let's patch the runtime nodes
 		// TODO: bypass the docker shell calls in runScript and use cluster.NewProvider instead
 
-		if !nvNode.HasGPUs() {
+		if clusterConfig == nil || clusterConfig.Nodes == nil || !nvNode.HasGPUs() {
 			continue
 		}
 		if err := nvNode.InstallContainerToolkit(); err != nil {
@@ -263,31 +263,31 @@ func resourceKindClusterCreate(d *schema.ResourceData, meta interface{}) error {
 	clusterField := nvClusterReflected.FieldByName("config")
 	if clusterField.IsValid() && clusterField.CanAddr() {
 		ptr := unsafe.Pointer(clusterField.UnsafeAddr())
-		reflect.NewAt(clusterField.Type(), ptr).Elem().Set(reflect.ValueOf(clusterConfig))
+		*(**v1alpha4.Cluster)(ptr) = clusterConfig
 	}
 
 	kubeconfigField := nvClusterReflected.FieldByName("kubeconfig")
 	if kubeconfigField.IsValid() && kubeconfigField.CanAddr() {
 		ptr := unsafe.Pointer(kubeconfigField.UnsafeAddr())
-		reflect.NewAt(kubeconfigField.Type(), ptr).Elem().Set(reflect.ValueOf(kubeconfigPathStr))
+		*(*string)(ptr) = kubeconfigPathStr
 	}
 
 	nvmlField := nvClusterReflected.FieldByName("nvml")
 	if nvmlField.IsValid() && nvmlField.CanAddr() {
 		ptr := unsafe.Pointer(nvmlField.UnsafeAddr())
-		reflect.NewAt(nvmlField.Type(), ptr).Elem().Set(reflect.ValueOf(nvmlReflected))
+		*(**any)(ptr) = (*any)(unsafe.Pointer(&nvmlReflected))
 	}
 
 	stdoutField := nvClusterReflected.FieldByName("stdout")
 	if stdoutField.IsValid() && stdoutField.CanAddr() {
 		ptr := unsafe.Pointer(stdoutField.UnsafeAddr())
-		reflect.NewAt(stdoutField.Type(), ptr).Elem().Set(reflect.ValueOf(stdoutReflected))
+		*(**os.File)(ptr) = (*os.File)(unsafe.Pointer(&stdoutReflected))
 	}
 
 	stderrField := nvClusterReflected.FieldByName("stderr")
 	if stderrField.IsValid() && stderrField.CanAddr() {
 		ptr := unsafe.Pointer(stderrField.UnsafeAddr())
-		reflect.NewAt(stderrField.Type(), ptr).Elem().Set(reflect.ValueOf(stderrReflected))
+		*(**os.File)(ptr) = (*os.File)(unsafe.Pointer(&stderrReflected))
 	}
 
 	// Let's patch the runtime cluster with kubectl

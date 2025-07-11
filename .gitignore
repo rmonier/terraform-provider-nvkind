@@ -69,3 +69,4 @@ terraform.rc
 # Build artifacts
 bin/
 dist/
+nvkind/*-config
