@@ -27,7 +27,7 @@ Copy the following code into a file with the extension `.tf` to create a nvkind 
 ```hcl
 provider "nvkind" {}
 
-resource "kind_cluster" "default" {
+resource "nvkind_cluster" "default" {
     name = "test-cluster"
 }
 ```

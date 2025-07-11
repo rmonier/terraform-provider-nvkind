@@ -15,7 +15,7 @@ const (
 func Provider() *schema.Provider {
 	return &schema.Provider{
 		ResourcesMap: map[string]*schema.Resource{
-			"kind_cluster": resourceCluster(),
+			"nvkind_cluster": resourceCluster(),
 		},
 	}
 }

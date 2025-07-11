@@ -10,7 +10,7 @@ terraform {
 provider "nvkind" {
 }
 
-resource "kind_cluster" "default" {
+resource "nvkind_cluster" "default" {
   name = "new-cluster"
   wait_for_ready = true
   kind_config {

@@ -1,4 +1,4 @@
-# kind_cluster
+# nvkind_cluster
 
 Provides a NVKind cluster resource. This can be used to create and delete NVKind
 clusters. It does NOT support modification to an existing nvkind cluster.
@@ -9,7 +9,7 @@ clusters. It does NOT support modification to an existing nvkind cluster.
 # Create a nvkind cluster of the name "test-cluster" with default kubernetes
 # version specified in kind
 # ref: https://github.com/kubernetes-sigs/kind/blob/master/pkg/apis/config/defaults/image.go#L21
-resource "kind_cluster" "default" {
+resource "nvkind_cluster" "default" {
     name = "test-cluster"
 }
 ```
@@ -20,7 +20,7 @@ To override the node image used:
 provider "nvkind" {}
 
 # Create a cluster with nvkind of the name "test-cluster" with kubernetes version v1.27.1
-resource "kind_cluster" "default" {
+resource "nvkind_cluster" "default" {
     name = "test-cluster"
     node_image = "kindest/node:v1.27.1"
 }
@@ -31,7 +31,7 @@ To configure the cluster for nginx's ingress controller based on [kind's docs](h
 ```hcl
 provider "nvkind" {}
 
-resource "kind_cluster" "default" {
+resource "nvkind_cluster" "default" {
     name           = "test-cluster"
     wait_for_ready = true
 
@@ -69,7 +69,7 @@ To override the default nvkind config:
 provider "nvkind" {}
 
 # creating a cluster with nvkind of the name "test-cluster" with kubernetes version v1.27.1 and two nodes
-resource "kind_cluster" "default" {
+resource "nvkind_cluster" "default" {
     name = "test-cluster"
     node_image = "kindest/node:v1.27.1"
     kind_config  {
@@ -90,7 +90,7 @@ resource "kind_cluster" "default" {
 provider "nvkind" {}
 
 # Create a cluster with patches applied to the containerd config
-resource "kind_cluster" "default" {
+resource "nvkind_cluster" "default" {
     name = "test-cluster"
     node_image = "kindest/node:v1.27.1"
     kind_config = {
@@ -111,7 +111,7 @@ locals {
     k8s_config_path = pathexpand("~/folder/config")
 }
 
-resource "kind_cluster" "default" {
+resource "nvkind_cluster" "default" {
     name = "test-cluster"
     kubeconfig_path = local.k8s_config_path
     # ...

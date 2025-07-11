@@ -15,7 +15,7 @@ The NVKind provider is used to interact with [Kubernetes IN Docker with NVIDIA G
 provider "nvkind" {}
 
 # Create a cluster
-resource "kind_cluster" "default" {
+resource "nvkind_cluster" "default" {
     name = "test-cluster"
 }
 ```

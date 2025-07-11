@@ -12,8 +12,8 @@ import (
 )
 
 func init() {
-	resource.AddTestSweepers("kind_cluster", &resource.Sweeper{
-		Name: "kind_cluster",
+	resource.AddTestSweepers("nvkind_cluster", &resource.Sweeper{
+		Name: "nvkind_cluster",
 		F:    testSweepKindCluster,
 	})
 }
@@ -27,7 +27,7 @@ func testSweepKindCluster(name string) error {
 const nodeImage = "kindest/node:v1.33.1@sha256:050072256b9a903bd914c0b2866828150cb229cea0efe5892e2b644d5dd3b34f"
 
 func TestAccCluster(t *testing.T) {
-	resourceName := "kind_cluster.test"
+	resourceName := "nvkind_cluster.test"
 	clusterName := acctest.RandomWithPrefix("tf-acc-cluster-test")
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -97,7 +97,7 @@ func TestAccCluster(t *testing.T) {
 }
 
 func TestAccClusterConfigBase(t *testing.T) {
-	resourceName := "kind_cluster.test"
+	resourceName := "nvkind_cluster.test"
 	clusterName := acctest.RandomWithPrefix("tf-acc-config-base-test")
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -214,7 +214,7 @@ func TestAccClusterConfigBase(t *testing.T) {
 }
 
 func TestAccClusterConfigNodes(t *testing.T) {
-	resourceName := "kind_cluster.test"
+	resourceName := "nvkind_cluster.test"
 	clusterName := acctest.RandomWithPrefix("tf-acc-config-nodes-test")
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -321,7 +321,7 @@ func TestAccClusterConfigNodes(t *testing.T) {
 }
 
 func TestAccClusterContainerdPatches(t *testing.T) {
-	resourceName := "kind_cluster.test"
+	resourceName := "nvkind_cluster.test"
 	clusterName := acctest.RandomWithPrefix("tf-acc-containerd-test")
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -347,7 +347,7 @@ func TestAccClusterContainerdPatches(t *testing.T) {
 }
 
 func TestAccContainerdPatchFormatOnlyChangeIsNoop(t *testing.T) {
-	resourceName := "kind_cluster.test"
+	resourceName := "nvkind_cluster.test"
 	clusterName := acctest.RandomWithPrefix("tf-acc-containerd-formatting")
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -409,7 +409,7 @@ func testAccCheckClusterCreate(name string) resource.TestCheckFunc {
 func testAccBasicClusterConfig(name string) string {
 
 	return fmt.Sprintf(`
-resource "kind_cluster" "test" {
+resource "nvkind_cluster" "test" {
   name = "%s"
 }
 `, name)
@@ -418,7 +418,7 @@ resource "kind_cluster" "test" {
 func testAccBasicClusterConfigWithKubeconfigPath(name string) string {
 
 	return fmt.Sprintf(`
-resource "kind_cluster" "test" {
+resource "nvkind_cluster" "test" {
   name = "%s"
   kubeconfig_path = "/tmp/kind-provider-test/new_file"
 }
@@ -427,7 +427,7 @@ resource "kind_cluster" "test" {
 
 func testAccNodeImageClusterConfig(name string) string {
 	return fmt.Sprintf(`
-resource "kind_cluster" "test" {
+resource "nvkind_cluster" "test" {
   name = "%s"
   node_image = "%s"
 }
@@ -436,7 +436,7 @@ resource "kind_cluster" "test" {
 
 func testAccBasicWaitForReadyClusterConfig(name string) string {
 	return fmt.Sprintf(`
-resource "kind_cluster" "test" {
+resource "nvkind_cluster" "test" {
   name = "%s"
   wait_for_ready = true
 }
@@ -445,7 +445,7 @@ resource "kind_cluster" "test" {
 
 func testAccNodeImageWaitForReadyClusterConfig(name string) string {
 	return fmt.Sprintf(`
-resource "kind_cluster" "test" {
+resource "nvkind_cluster" "test" {
   name = "%s"
   node_image = "%s"
   wait_for_ready = true
@@ -455,7 +455,7 @@ resource "kind_cluster" "test" {
 
 func testAccNodeImageWaitForReadyClusterConfigAndExtra(name string) string {
 	return fmt.Sprintf(`
-resource "kind_cluster" "test" {
+resource "nvkind_cluster" "test" {
   name = "%s"
   node_image = "%s"
   wait_for_ready = true
@@ -469,7 +469,7 @@ resource "kind_cluster" "test" {
 
 func testAccNodeImageClusterConfigAndExtra(name string) string {
 	return fmt.Sprintf(`
-resource "kind_cluster" "test" {
+resource "nvkind_cluster" "test" {
   name = "%s"
   node_image = "%s"
   wait_for_ready = false
@@ -483,7 +483,7 @@ resource "kind_cluster" "test" {
 
 func testAccWaitForReadyClusterConfigAndExtra(name string) string {
 	return fmt.Sprintf(`
-resource "kind_cluster" "test" {
+resource "nvkind_cluster" "test" {
   name = "%s"
   wait_for_ready = true
   kind_config {
@@ -496,7 +496,7 @@ resource "kind_cluster" "test" {
 
 func testAccClusterConfigAndExtra(name string) string {
 	return fmt.Sprintf(`
-resource "kind_cluster" "test" {
+resource "nvkind_cluster" "test" {
   name = "%s"
   wait_for_ready = false
   kind_config {
@@ -509,7 +509,7 @@ resource "kind_cluster" "test" {
 
 func testAccBasicExtraConfigClusterConfig(name string) string {
 	return fmt.Sprintf(`
-resource "kind_cluster" "test" {
+resource "nvkind_cluster" "test" {
   name = "%s"
   kind_config {
 	kind = "Cluster"
@@ -533,7 +533,7 @@ resource "kind_cluster" "test" {
 
 func testAccBasicWaitForReadyExtraConfigClusterConfig(name string) string {
 	return fmt.Sprintf(`
-resource "kind_cluster" "test" {
+resource "nvkind_cluster" "test" {
   name = "%s"
   wait_for_ready = true
   kind_config {
@@ -554,7 +554,7 @@ resource "kind_cluster" "test" {
 
 func testAccNodeImageExtraConfigClusterConfig(name string) string {
 	return fmt.Sprintf(`
-resource "kind_cluster" "test" {
+resource "nvkind_cluster" "test" {
   name = "%s"
   node_image = "%s"
   kind_config {
@@ -575,7 +575,7 @@ resource "kind_cluster" "test" {
 
 func testAccNodeImageWaitForReadyExtraConfigClusterConfig(name string) string {
 	return fmt.Sprintf(`
-resource "kind_cluster" "test" {
+resource "nvkind_cluster" "test" {
   name = "%s"
   node_image = "%s"
   wait_for_ready = true
@@ -597,7 +597,7 @@ resource "kind_cluster" "test" {
 
 func testAccThreeNodesClusterConfig(name string) string {
 	return fmt.Sprintf(`
-resource "kind_cluster" "test" {
+resource "nvkind_cluster" "test" {
   name = "%s"
   node_image = "%s"
   wait_for_ready = true
@@ -623,7 +623,7 @@ resource "kind_cluster" "test" {
 
 func testAccThreeNodesImageOnNodeClusterConfig(name string) string {
 	return fmt.Sprintf(`
-resource "kind_cluster" "test" {
+resource "nvkind_cluster" "test" {
   name = "%s"
   wait_for_ready = true
   kind_config {
@@ -649,7 +649,7 @@ resource "kind_cluster" "test" {
 
 func testSingleContainerdConfigPatch(name string) string {
 	return fmt.Sprintf(`
-resource "kind_cluster" "test" {
+resource "nvkind_cluster" "test" {
   name = "%s"
   wait_for_ready = true
   kind_config {
@@ -668,7 +668,7 @@ resource "kind_cluster" "test" {
 
 func testTwoContainerdConfigPatches(name string) string {
 	return fmt.Sprintf(`
-resource "kind_cluster" "test" {
+resource "nvkind_cluster" "test" {
   name = "%s"
   wait_for_ready = true
   kind_config {
@@ -692,7 +692,7 @@ resource "kind_cluster" "test" {
 
 func testContainerdPatchWithSameContentButDifferentFormat(name string) string {
 	return fmt.Sprintf(`
-resource "kind_cluster" "test" {
+resource "nvkind_cluster" "test" {
   name = "%s"
   wait_for_ready = true
   kind_config {
@@ -724,7 +724,7 @@ resource "kind_cluster" "test" {
 
 func testAccClusterConfigAndExtraWithEmptyNetwork(name string) string {
 	return fmt.Sprintf(`
-resource "kind_cluster" "test" {
+resource "nvkind_cluster" "test" {
   name = "%s"
   wait_for_ready = false
   kind_config {
@@ -739,7 +739,7 @@ resource "kind_cluster" "test" {
 
 func testAccClusterConfigAndExtraWithNetworkValues(name string) string {
 	return fmt.Sprintf(`
-resource "kind_cluster" "test" {
+resource "nvkind_cluster" "test" {
   name = "%s"
   wait_for_ready = false
   kind_config {
@@ -757,7 +757,7 @@ resource "kind_cluster" "test" {
 
 func testAccClusterConfigAndExtraWithNetworkValuesKubeProxyDisabled(name string) string {
 	return fmt.Sprintf(`
-resource "kind_cluster" "test" {
+resource "nvkind_cluster" "test" {
   name = "%s"
   wait_for_ready = false
   kind_config {
@@ -774,7 +774,7 @@ resource "kind_cluster" "test" {
 
 func testAccClusterConfigAndRuntimeConfig(name string) string {
 	return fmt.Sprintf(`
-resource "kind_cluster" "test" {
+resource "nvkind_cluster" "test" {
   name = "%s"
   wait_for_ready = true
   kind_config {
